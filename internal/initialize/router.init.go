@@ -19,7 +19,7 @@ func InitRouter() *gin.Engine {
 
 	userRouter := routers.RouterGroupApp.User
 
-	MainGroup := r.Group("/v1/2024")
+	MainGroup := r.Group("/v1")
 	{
 		userRouter.InitUserRouter(MainGroup)
 	}

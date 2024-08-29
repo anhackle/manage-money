@@ -1,57 +1,78 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/anle/codebase/internal/po"
 	"github.com/anle/codebase/internal/repo"
 	"github.com/anle/codebase/response"
+	"gorm.io/gorm"
 )
 
 type IUserService interface {
-	Register(userInput po.User) int
-	Login(userInput po.User) int
+	Register(userInput po.User) (int, error)
+	Login(userInput po.User) (int, string, error)
 }
 
 type userService struct {
 	userRepo       repo.IUserRepo
-	passwordHasher IPasswordHasher
+	passwordHasher IPasswordHasherService
+	generateToken  IGenerateTokenService
 }
 
 // Login implements IUserService.
-func (us *userService) Login(userInput po.User) int {
-	password, err := us.userRepo.Login(userInput)
+func (us *userService) Login(userInput po.User) (int, string, error) {
+	user, err := us.userRepo.FindByEmail(userInput)
 	if err != nil {
-		return response.ErrCodeInternal
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.ErrCodeLoginFail, "", err
+		}
+
+		return response.ErrCodeInternal, "", err
 	}
 
-	if us.passwordHasher.Compare(password, userInput.Password) {
-		return response.ErrCodeSuccess
+	err = us.passwordHasher.Compare(user.Password, userInput.Password)
+	if err != nil {
+		return response.ErrCodeLoginFail, "", err
 	}
 
-	return response.ErrCodeLoginFail
+	accessToken, err := us.generateToken.GenerateToken(user)
+	if err != nil {
+		return response.ErrCodeInternal, "", err
+	}
+
+	return response.ErrCodeSuccess, accessToken, nil
 }
 
 // Register implements IUserService.
-func (us *userService) Register(userInput po.User) int {
-	if ok := us.userRepo.CheckExistByEmail(userInput.Email); ok {
-		return response.ErrCodeUserHasExists
+func (us *userService) Register(userInput po.User) (int, error) {
+	_, err := us.userRepo.FindByEmail(userInput)
+	if err == nil {
+		return response.ErrCodeUserHasExists, errors.New("user existed")
 	}
 
-	hashedPassword, err := us.passwordHasher.Hash(userInput.Password)
-	if err != nil {
-		return response.ErrCodeInternal
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		hashedPassword, err := us.passwordHasher.Hash(userInput.Password)
+		if err != nil {
+			return response.ErrCodeInternal, err
+		}
+
+		userInput.Password = hashedPassword
+		err = us.userRepo.CreateUser(userInput)
+		if err != nil {
+			return response.ErrCodeInternal, err
+		}
+
+		return response.ErrCodeSuccess, nil
 	}
 
-	userInput.Password = hashedPassword
-	if ok := us.userRepo.Register(userInput); ok {
-		return response.ErrCodeSuccess
-	}
-
-	return response.ErrCodeInternal
+	return response.ErrCodeInternal, err
 }
 
-func NewUserService(userRepo repo.IUserRepo, passwordHasher IPasswordHasher) IUserService {
+func NewUserService(userRepo repo.IUserRepo, passwordHasher IPasswordHasherService, generateToken IGenerateTokenService) IUserService {
 	return &userService{
 		userRepo:       userRepo,
 		passwordHasher: passwordHasher,
+		generateToken:  generateToken,
 	}
 }

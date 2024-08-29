@@ -2,9 +2,9 @@ package service
 
 import "golang.org/x/crypto/bcrypt"
 
-type IPasswordHasher interface {
+type IPasswordHasherService interface {
 	Hash(password string) (string, error)
-	Compare(hash, password string) bool
+	Compare(hash, password string) error
 }
 
 type bcryptPasswordHasher struct{}
@@ -18,11 +18,15 @@ func (ph *bcryptPasswordHasher) Hash(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-func (ph *bcryptPasswordHasher) Compare(hash, password string) bool {
+func (ph *bcryptPasswordHasher) Compare(hash, password string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func NewPasswordHahser() IPasswordHasher {
+func NewPasswordHasher() IPasswordHasherService {
 	return &bcryptPasswordHasher{}
 }

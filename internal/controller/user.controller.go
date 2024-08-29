@@ -18,16 +18,16 @@ func (uc *UserController) Register(c *gin.Context) {
 		return
 	}
 
-	result := uc.userService.Register(userInput)
+	result, _ := uc.userService.Register(userInput)
 
 	switch result {
-	case 20000:
+	case response.ErrCodeSuccess:
 		response.SuccessResponse(c, result, nil)
 		return
-	case 20001:
+	case response.ErrCodeInternal:
 		response.ErrorResponseInternal(c, result, nil)
 		return
-	case 50001:
+	case response.ErrCodeUserHasExists:
 		response.ErrorResponseExternal(c, result, nil)
 		return
 	}
@@ -40,15 +40,15 @@ func (uc *UserController) Login(c *gin.Context) {
 		return
 	}
 
-	result := uc.userService.Login(userInput)
+	result, accessToken, _ := uc.userService.Login(userInput)
 	switch result {
-	case 20000:
-		response.SuccessResponse(c, result, nil)
+	case response.ErrCodeSuccess:
+		response.SuccessResponse(c, result, accessToken)
 		return
-	case 20001:
+	case response.ErrCodeInternal:
 		response.ErrorResponseInternal(c, result, nil)
 		return
-	case 20004:
+	case response.ErrCodeLoginFail:
 		response.ErrorResponseExternal(c, result, nil)
 		return
 	}

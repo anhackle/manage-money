@@ -7,18 +7,18 @@ import (
 
 type UserRouter struct{}
 
-func (p *UserRouter) InitUserRouter(Router *gin.RouterGroup) {
+func (p *UserRouter) InitUserRouter(router *gin.RouterGroup) {
 	//public router
 	userController, _ := wire.InitUserRouterHandler()
 
-	userRouterPublic := Router.Group("/users")
+	userRouterPublic := router.Group("/users")
 	{
 		userRouterPublic.POST("/register", userController.Register)
 		userRouterPublic.POST("/login", userController.Login)
 	}
 
 	//private router
-	userRouterPrivate := Router.Group("/user")
+	userRouterPrivate := router.Group("/user")
 	{
 		userRouterPrivate.GET("/get-info")
 	}

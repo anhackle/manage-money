@@ -9,9 +9,8 @@ import (
 )
 
 type IUserRepo interface {
-	CheckExistByEmail(email string) bool
-	Register(userInput po.User) bool
-	Login(userInput po.User) (string, error)
+	CreateUser(userInput po.User) error
+	FindByEmail(userInput po.User) (po.User, error)
 }
 
 type userRepo struct{}
@@ -32,20 +31,21 @@ func (ur *userRepo) CheckExistByEmail(email string) bool {
 }
 
 // Register implements IUserRepo.
-func (ur *userRepo) Register(userInput po.User) bool {
+func (ur *userRepo) CreateUser(userInput po.User) error {
 	result := global.Mdb.Create(&userInput)
-	return result.Error == nil
+
+	return result.Error
 }
 
 // Login implements IUserRepo.
-func (ur *userRepo) Login(userInput po.User) (string, error) {
+func (ur *userRepo) FindByEmail(userInput po.User) (po.User, error) {
 	var user po.User
 	result := global.Mdb.Where("email = ?", userInput.Email).First(&user)
 	if result.Error != nil {
-		return "", result.Error
+		return po.User{}, result.Error
 	}
 
-	return user.Password, nil
+	return user, nil
 }
 
 func NewUserRepo() IUserRepo {
