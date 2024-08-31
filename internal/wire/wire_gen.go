@@ -16,10 +16,8 @@ import (
 
 func InitUserRouterHandler() (*controller.UserController, error) {
 	iUserRepo := repo.NewUserRepo()
-	iPasswordHasherService := service.NewPasswordHasher()
-	iGenerateTokenRepo := repo.NewGenerateTokenRepo()
-	iGenerateTokenService := service.NewGenerateTokenService(iGenerateTokenRepo)
-	iUserService := service.NewUserService(iUserRepo, iPasswordHasherService, iGenerateTokenService)
+	iTokenRepo := repo.NewTokenRepo()
+	iUserService := service.NewUserService(iUserRepo, iTokenRepo)
 	userController := controller.NewUserController(iUserService)
 	return userController, nil
 }

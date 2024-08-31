@@ -5,6 +5,8 @@ import (
 
 	"github.com/anle/codebase/internal/po"
 	"github.com/anle/codebase/internal/repo"
+	"github.com/anle/codebase/internal/utils/hasher"
+	"github.com/anle/codebase/internal/utils/token"
 	"github.com/anle/codebase/response"
 	"gorm.io/gorm"
 )
@@ -15,9 +17,8 @@ type IUserService interface {
 }
 
 type userService struct {
-	userRepo       repo.IUserRepo
-	passwordHasher IPasswordHasherService
-	generateToken  IGenerateTokenService
+	userRepo  repo.IUserRepo
+	tokenRepo repo.ITokenRepo
 }
 
 // Login implements IUserService.
@@ -31,12 +32,17 @@ func (us *userService) Login(userInput po.User) (int, string, error) {
 		return response.ErrCodeInternal, "", err
 	}
 
-	err = us.passwordHasher.Compare(user.Password, userInput.Password)
+	err = hasher.Compare(user.Password, userInput.Password)
 	if err != nil {
 		return response.ErrCodeLoginFail, "", err
 	}
 
-	accessToken, err := us.generateToken.GenerateToken(user)
+	accessToken, err := token.GenerateToken(user)
+	if err != nil {
+		return response.ErrCodeInternal, "", err
+	}
+
+	err = us.tokenRepo.CreateToken(user, accessToken)
 	if err != nil {
 		return response.ErrCodeInternal, "", err
 	}
@@ -52,7 +58,7 @@ func (us *userService) Register(userInput po.User) (int, error) {
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		hashedPassword, err := us.passwordHasher.Hash(userInput.Password)
+		hashedPassword, err := hasher.Hash(userInput.Password)
 		if err != nil {
 			return response.ErrCodeInternal, err
 		}
@@ -69,10 +75,9 @@ func (us *userService) Register(userInput po.User) (int, error) {
 	return response.ErrCodeInternal, err
 }
 
-func NewUserService(userRepo repo.IUserRepo, passwordHasher IPasswordHasherService, generateToken IGenerateTokenService) IUserService {
+func NewUserService(userRepo repo.IUserRepo, tokenRepo repo.ITokenRepo) IUserService {
 	return &userService{
-		userRepo:       userRepo,
-		passwordHasher: passwordHasher,
-		generateToken:  generateToken,
+		userRepo:  userRepo,
+		tokenRepo: tokenRepo,
 	}
 }
