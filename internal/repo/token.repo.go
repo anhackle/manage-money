@@ -32,6 +32,8 @@ func (gtr *tokenRepo) CreateToken(user po.User, accessToken string) error {
 		Token:  accessToken,
 		UserID: user.ID,
 	}
+	// Add this token to Redis instead of Mysql
+	// Easily manage token timeout
 	result := global.Mdb.Create(&token)
 
 	return result.Error

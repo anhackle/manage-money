@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"github.com/anle/codebase/global"
+	"github.com/anle/codebase/internal/middlewares"
 	"github.com/anle/codebase/internal/routers"
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,8 @@ func InitRouter() *gin.Engine {
 		gin.SetMode(gin.ReleaseMode)
 		r = gin.New()
 	}
+
+	r.Use(middlewares.CORSMiddleware())
 
 	userRouter := routers.RouterGroupApp.User
 
