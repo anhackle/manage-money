@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"github.com/anle/codebase/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,7 +11,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
 
 		if c.Request.Method == "OPTIONS" {
-			response.ErrorResponseExternal(c, 20002, nil)
+			c.AbortWithStatus(204)
 			return
 		}
 
