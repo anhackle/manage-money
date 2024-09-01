@@ -5,6 +5,7 @@ func Run() {
 	InitLogger()
 	InitMysql()
 	InitRedis()
+	InitValidator()
 
 	r := InitRouter()
 	r.Run(":8082")

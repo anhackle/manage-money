@@ -5,7 +5,7 @@ import (
 
 	"github.com/anle/codebase/internal/po"
 	"github.com/anle/codebase/internal/repo"
-	"github.com/anle/codebase/internal/utils/hasher"
+	hasher "github.com/anle/codebase/internal/utils/hash"
 	"github.com/anle/codebase/internal/utils/token"
 	"github.com/anle/codebase/response"
 	"gorm.io/gorm"

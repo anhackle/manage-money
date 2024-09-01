@@ -12,6 +12,22 @@ type ResponseData struct {
 	Data    interface{} `json:"data"`
 }
 
+func HandleResult(c *gin.Context, result int, data any) {
+	switch result {
+	case ErrCodeSuccess:
+		SuccessResponse(c, result, data)
+
+	case ErrCodeInternal:
+		ErrorResponseInternal(c, result, nil)
+
+	case ErrCodeUserHasExists:
+		ErrorResponseExternal(c, result, nil)
+
+	case ErrCodeLoginFail:
+		ErrorResponseExternal(c, result, nil)
+	}
+}
+
 // success
 func SuccessResponse(c *gin.Context, code int, data any) {
 	c.JSON(http.StatusOK, ResponseData{
