@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/anle/codebase/internal/middlewares"
 	"github.com/anle/codebase/internal/wire"
 	"github.com/gin-gonic/gin"
 )
@@ -12,15 +13,18 @@ func (p *UserRouter) InitUserRouter(router *gin.RouterGroup) {
 	userController, _ := wire.InitUserRouterHandler()
 
 	userRouterPublic := router.Group("/users")
+
 	{
 		userRouterPublic.POST("/register", userController.Register)
 		userRouterPublic.POST("/login", userController.Login)
 	}
 
 	//private router
-	userRouterPrivate := router.Group("/user")
+	userRouterPrivate := router.Group("/users")
+	userRouterPrivate.Use(middlewares.AuthMiddleware())
+
 	{
-		userRouterPrivate.GET("/get-info")
+		userRouterPrivate.GET("/profile", userController.Profile)
 	}
 
 }

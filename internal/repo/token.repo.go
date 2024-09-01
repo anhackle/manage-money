@@ -2,6 +2,7 @@ package repo
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/anle/codebase/global"
 	"github.com/anle/codebase/internal/po"
@@ -14,7 +15,6 @@ type ITokenRepo interface {
 
 type tokenRepo struct{}
 
-// FindToken implements IGenerateTokenRepo.
 func (gtr *tokenRepo) FindUserByToken(accessToken string) (po.User, error) {
 	var token po.Token
 	result := global.Mdb.Where("token = ?", accessToken).Preload("User").First(&token)
@@ -26,17 +26,19 @@ func (gtr *tokenRepo) FindUserByToken(accessToken string) (po.User, error) {
 	return token.User, nil
 }
 
-// CreateToken implements IGenerateTokenRepo.
 func (gtr *tokenRepo) CreateToken(user po.User, accessToken string) error {
-	var token = po.Token{
-		Token:  accessToken,
-		UserID: user.ID,
+	// TODO: Add this token to Redis instead of Mysql
+	err := global.Rdb.SetEx(ctx, accessToken, user.Email, 3600*time.Second).Err()
+	if err != nil {
+		return err
 	}
-	// Add this token to Redis instead of Mysql
-	// Easily manage token timeout
-	result := global.Mdb.Create(&token)
 
-	return result.Error
+	err = global.Rdb.SetEx(ctx, user.Email, accessToken, 3600*time.Second).Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewTokenRepo() ITokenRepo {

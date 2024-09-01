@@ -52,3 +52,11 @@ func ErrorResponseInternal(c *gin.Context, code int, data any) {
 		Data:    nil,
 	})
 }
+
+func ErrorResponseNoLogin(c *gin.Context, code int, data any) {
+	c.JSON(http.StatusUnauthorized, ResponseData{
+		Code:    code,
+		Message: msg[code],
+		Data:    data,
+	})
+}

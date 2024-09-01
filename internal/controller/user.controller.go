@@ -14,7 +14,7 @@ type UserController struct {
 func (uc *UserController) Register(c *gin.Context) {
 	var userInput po.User
 	if err := c.ShouldBindJSON(&userInput); err != nil {
-		response.ErrorResponseExternal(c, 20002, nil)
+		response.ErrorResponseExternal(c, response.ErrCodeExternal, nil)
 		return
 	}
 
@@ -26,16 +26,17 @@ func (uc *UserController) Register(c *gin.Context) {
 func (uc *UserController) Login(c *gin.Context) {
 	var userInput po.User
 	if err := c.ShouldBindJSON(&userInput); err != nil {
-		response.ErrorResponseExternal(c, 20002, nil)
+		response.ErrorResponseExternal(c, response.ErrCodeExternal, nil)
 		return
 	}
 
 	result, accessToken, _ := uc.userService.Login(userInput)
-	if result == response.ErrCodeSuccess {
-		c.SetCookie("access-token", accessToken, 3600, "/", "local.manage-money.com", true, true)
-	}
 
-	response.HandleResult(c, result, nil)
+	response.HandleResult(c, result, accessToken)
+}
+
+func (uc *UserController) Profile(c *gin.Context) {
+	response.HandleResult(c, response.ErrCodeSuccess, "This is profile page")
 }
 
 func NewUserController(userService service.IUserService) *UserController {
