@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"strings"
 
 	"github.com/anle/codebase/global"
 	"github.com/anle/codebase/response"
@@ -9,19 +10,22 @@ import (
 )
 
 var (
-	cookieName = "access-token"
+	headerName = "Authorization"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		cookieValue, err := c.Cookie(cookieName)
-		if err != nil {
+		headerValue := c.GetHeader(headerName)
+		arrayHeaderValues := strings.Split(headerValue, " ")
+
+		if len(arrayHeaderValues) != 2 || arrayHeaderValues[0] != "Bearer" {
 			response.ErrorResponseNoLogin(c, response.ErrTokenInvalid, nil)
 			c.Abort()
 			return
 		}
 
-		email, err := global.Rdb.Get(context.Background(), cookieValue).Result()
+		accessToken := arrayHeaderValues[1]
+		email, err := global.Rdb.Get(context.Background(), accessToken).Result()
 		if err != nil {
 			response.ErrorResponseNoLogin(c, response.ErrTokenInvalid, nil)
 			c.Abort()

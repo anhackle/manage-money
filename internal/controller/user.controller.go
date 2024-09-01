@@ -31,11 +31,8 @@ func (uc *UserController) Login(c *gin.Context) {
 	}
 
 	result, accessToken, _ := uc.userService.Login(userInput)
-	if result == response.ErrCodeSuccess {
-		c.SetCookie("access-token", accessToken, 3600, "/", "local.manage-money.com", true, true)
-	}
 
-	response.HandleResult(c, result, nil)
+	response.HandleResult(c, result, accessToken)
 }
 
 func (uc *UserController) Profile(c *gin.Context) {
