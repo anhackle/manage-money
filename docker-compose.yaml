@@ -5,10 +5,10 @@ services:
     image: mysql:5.7
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD=root_password
-      MYSQL_DATABASE=moneymanage
-      MYSQL_USER=admin
-      MYSQL_PASSWORD=admin
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: moneymanage
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
     ports:
       - "3306:3306"
     volumes:
