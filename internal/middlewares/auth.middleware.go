@@ -16,8 +16,13 @@ var (
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		headerValue := c.GetHeader(headerName)
-		arrayHeaderValues := strings.Split(headerValue, " ")
+		if headerValue == "" {
+			response.ErrorResponseNoLogin(c, response.ErrTokenInvalid, nil)
+			c.Abort()
+			return
+		}
 
+		arrayHeaderValues := strings.Split(headerValue, " ")
 		if len(arrayHeaderValues) != 2 || arrayHeaderValues[0] != "Bearer" {
 			response.ErrorResponseNoLogin(c, response.ErrTokenInvalid, nil)
 			c.Abort()
