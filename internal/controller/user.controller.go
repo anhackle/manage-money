@@ -31,7 +31,11 @@ func (uc *UserController) Login(c *gin.Context) {
 	}
 
 	result, accessToken, _ := uc.userService.Login(userInput)
-	response.HandleResult(c, result, accessToken)
+	if result == response.ErrCodeSuccess {
+		c.SetCookie("access-token", accessToken, 3600, "/", "localhost:8082", true, true)
+	}
+
+	response.HandleResult(c, result, nil)
 }
 
 func NewUserController(userService service.IUserService) *UserController {
