@@ -38,6 +38,10 @@ func (uc *UserController) Login(c *gin.Context) {
 	response.HandleResult(c, result, nil)
 }
 
+func (uc *UserController) Profile(c *gin.Context) {
+	response.HandleResult(c, 20000, "This is profile page")
+}
+
 func NewUserController(userService service.IUserService) *UserController {
 	return &UserController{
 		userService: userService,
