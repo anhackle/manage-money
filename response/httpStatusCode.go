@@ -2,12 +2,12 @@ package response
 
 const (
 	ErrCodeSuccess       = 20000
-	ErrCodeInternal      = 50000
 	ErrCodeExternal      = 40000
-	ErrCodeParamInvalid  = 20003
-	ErrCodeLoginFail     = 20004
+	ErrCodeParamInvalid  = 40001
+	ErrCodeLoginFail     = 40002
+	ErrCodeUserHasExists = 40003
 	ErrTokenInvalid      = 40100
-	ErrCodeUserHasExists = 50001
+	ErrCodeInternal      = 50000
 )
 
 // message
