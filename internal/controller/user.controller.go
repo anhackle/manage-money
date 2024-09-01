@@ -32,7 +32,7 @@ func (uc *UserController) Login(c *gin.Context) {
 
 	result, accessToken, _ := uc.userService.Login(userInput)
 	if result == response.ErrCodeSuccess {
-		c.SetCookie("access-token", accessToken, 3600, "/", "localhost", true, true)
+		c.SetCookie("access-token", accessToken, 3600, "/", "local.manage-money.com", true, true)
 	}
 
 	response.HandleResult(c, result, nil)
