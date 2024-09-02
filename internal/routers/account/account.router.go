@@ -18,8 +18,8 @@ func (p *AccountRouter) InitAccountRouter(router *gin.RouterGroup) {
 	{
 		AccountRouterPrivate.GET("/", accountController.ListAccount)
 		AccountRouterPrivate.POST("/", accountController.CreateAccount)
-		AccountRouterPrivate.PUT("/:id", accountController.UpdateAccount)
-		AccountRouterPrivate.DELETE("/:id", accountController.DeleteAccount)
+		AccountRouterPrivate.PUT("/", accountController.UpdateAccount)
+		AccountRouterPrivate.DELETE("/", accountController.DeleteAccount)
 	}
 
 }

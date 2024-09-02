@@ -9,8 +9,8 @@ import (
 type IAccountService interface {
 	ListAccount(userID int) (int, []dto.AccountOutput, error)
 	CreateAccount(userID int, account dto.AccountCreateInput) (int, error)
-	UpdateAccount(account dto.AccountUpdateInput) (int, error)
-	DeleteAccount(account dto.AccountDeleteInput) (int, error)
+	UpdateAccount(userID int, account dto.AccountUpdateInput) (int, error)
+	DeleteAccount(userID int, account dto.AccountDeleteInput) (int, error)
 }
 
 type accountService struct {
@@ -38,13 +38,23 @@ func (as *accountService) ListAccount(userID int) (int, []dto.AccountOutput, err
 }
 
 // DeleteAccount implements IAccountService.
-func (as *accountService) DeleteAccount(account dto.AccountDeleteInput) (int, error) {
-	panic("unimplemented")
+func (as *accountService) DeleteAccount(userID int, accountInput dto.AccountDeleteInput) (int, error) {
+	err := as.accountRepo.DeleteAccount(userID, accountInput)
+	if err != nil {
+		return response.ErrCodeInternal, err
+	}
+
+	return response.ErrCodeSuccess, nil
 }
 
 // UpdateAccount implements IAccountService.
-func (as *accountService) UpdateAccount(account dto.AccountUpdateInput) (int, error) {
-	panic("unimplemented")
+func (as *accountService) UpdateAccount(userID int, accountInput dto.AccountUpdateInput) (int, error) {
+	err := as.accountRepo.UpdateAccount(userID, accountInput)
+	if err != nil {
+		return response.ErrCodeInternal, err
+	}
+
+	return response.ErrCodeSuccess, nil
 }
 
 func NewAccountService(accountRepo repo.IAccountRepo) IAccountService {

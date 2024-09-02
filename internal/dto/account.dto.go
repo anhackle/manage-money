@@ -2,8 +2,8 @@ package dto
 
 type AccountOutput struct {
 	ID          int    `json:"accountID" gorm:"column:id"`
-	AccountName string `json:"accountName" gorm:"column:name"`
-	Description string `json:"description" gorm:"column:desc"`
+	AccountName string `json:"accountName" gorm:"column:accountName"`
+	Description string `json:"description" gorm:"column:description"`
 	Balance     int    `json:"balance" gorm:"column:balance"`
 }
 
