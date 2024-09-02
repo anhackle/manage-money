@@ -15,22 +15,22 @@ type IAccountRepo interface {
 type accountRepo struct{}
 
 // CreateAccount implements IAccountRepo.
-func (a *accountRepo) CreateAccount() error {
+func (ar *accountRepo) CreateAccount() error {
 	panic("unimplemented")
 }
 
 // DeleteAccount implements IAccountRepo.
-func (a *accountRepo) DeleteAccount(account dto.Account) error {
+func (ar *accountRepo) DeleteAccount(account dto.Account) error {
 	panic("unimplemented")
 }
 
 // FindAccount implements IAccountRepo.
-func (a *accountRepo) FindAccount() ([]po.Account, error) {
+func (ar *accountRepo) FindAccount() ([]po.Account, error) {
 	panic("unimplemented")
 }
 
 // UpdateAccount implements IAccountRepo.
-func (a *accountRepo) UpdateAccount(account dto.Account) error {
+func (ar *accountRepo) UpdateAccount(account dto.Account) error {
 	panic("unimplemented")
 }
 

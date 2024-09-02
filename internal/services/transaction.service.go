@@ -8,7 +8,7 @@ import (
 
 type ITransactionService interface {
 	ListTransaction() ([]po.Token, error)
-	MakeTransaction(fromAccount dto.Account, toAccount dto.Account, amount int) error
+	CreateTransaction(fromAccount dto.Account, toAccount dto.Account, amount int) error
 }
 
 type transactionService struct {
@@ -16,12 +16,12 @@ type transactionService struct {
 }
 
 // ListTransaction implements ITransactionService.
-func (t *transactionService) ListTransaction() ([]po.Token, error) {
+func (ts *transactionService) ListTransaction() ([]po.Token, error) {
 	panic("unimplemented")
 }
 
 // MakeTransaction implements ITransactionService.
-func (t *transactionService) MakeTransaction(fromAccount dto.Account, toAccount dto.Account, amount int) error {
+func (ts *transactionService) CreateTransaction(fromAccount dto.Account, toAccount dto.Account, amount int) error {
 	panic("unimplemented")
 }
 

@@ -18,22 +18,22 @@ type accountService struct {
 }
 
 // CreateAccount implements IAccountService.
-func (a *accountService) CreateAccount() error {
+func (as *accountService) CreateAccount() error {
 	panic("unimplemented")
 }
 
 // DeleteAccount implements IAccountService.
-func (a *accountService) DeleteAccount(dto.Account) error {
+func (as *accountService) DeleteAccount(dto.Account) error {
 	panic("unimplemented")
 }
 
 // ListAccount implements IAccountService.
-func (a *accountService) ListAccount() (po.Account, error) {
+func (as *accountService) ListAccount() (po.Account, error) {
 	panic("unimplemented")
 }
 
 // UpdateAccount implements IAccountService.
-func (a *accountService) UpdateAccount(dto.Account) error {
+func (as *accountService) UpdateAccount(dto.Account) error {
 	panic("unimplemented")
 }
 
