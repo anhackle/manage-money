@@ -14,6 +14,7 @@ var (
 )
 
 func AuthMiddleware() gin.HandlerFunc {
+	//TODO: Use DI for AuthMiddleware
 	return func(c *gin.Context) {
 		headerValue := c.GetHeader(headerName)
 		if headerValue == "" {
@@ -30,14 +31,14 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		accessToken := arrayHeaderValues[1]
-		email, err := global.Rdb.Get(context.Background(), accessToken).Result()
+		userID, err := global.Rdb.Get(context.Background(), accessToken).Int()
 		if err != nil {
 			response.ErrorResponseNoLogin(c, response.ErrTokenInvalid, nil)
 			c.Abort()
 			return
 		}
 
-		c.Set("email", email)
+		c.Set("userID", userID)
 
 		c.Next()
 

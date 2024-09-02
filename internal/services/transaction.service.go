@@ -1,14 +1,13 @@
 package service
 
 import (
-	"github.com/anle/codebase/internal/dto"
 	"github.com/anle/codebase/internal/po"
 	"github.com/anle/codebase/internal/repo"
 )
 
 type ITransactionService interface {
 	ListTransaction() ([]po.Token, error)
-	CreateTransaction(fromAccount dto.Account, toAccount dto.Account, amount int) error
+	CreateTransaction() error
 }
 
 type transactionService struct {
@@ -21,7 +20,7 @@ func (ts *transactionService) ListTransaction() ([]po.Token, error) {
 }
 
 // MakeTransaction implements ITransactionService.
-func (ts *transactionService) CreateTransaction(fromAccount dto.Account, toAccount dto.Account, amount int) error {
+func (ts *transactionService) CreateTransaction() error {
 	panic("unimplemented")
 }
 

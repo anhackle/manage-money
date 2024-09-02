@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"github.com/anle/codebase/internal/dto"
 	service "github.com/anle/codebase/internal/services"
+	"github.com/anle/codebase/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,11 +12,39 @@ type AccountController struct {
 }
 
 func (ac *AccountController) ListAccount(c *gin.Context) {
-	panic("")
+	var (
+		userID   = c.GetInt("userID")
+		accounts []dto.AccountOutput
+	)
+
+	result, accounts, err := ac.accountService.ListAccount(userID)
+	if err != nil {
+		response.ErrorResponseInternal(c, response.ErrCodeInternal, nil)
+		return
+	}
+
+	response.HandleResult(c, result, accounts)
 }
 
 func (ac *AccountController) CreateAccount(c *gin.Context) {
-	panic("")
+	var (
+		accountInput dto.AccountCreateInput
+		userID       = c.GetInt("userID")
+	)
+
+	if err := c.ShouldBindJSON(&accountInput); err != nil {
+		response.ErrorResponseExternal(c, response.ErrCodeExternal, nil)
+		return
+	}
+
+	result, err := ac.accountService.CreateAccount(userID, accountInput)
+	if err != nil {
+		response.ErrorResponseInternal(c, response.ErrCodeInternal, nil)
+		return
+	}
+
+	response.HandleResult(c, result, nil)
+
 }
 func (ac *AccountController) UpdateAccount(c *gin.Context) {
 	panic("")

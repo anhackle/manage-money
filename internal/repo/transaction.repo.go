@@ -1,19 +1,18 @@
 package repo
 
 import (
-	"github.com/anle/codebase/internal/dto"
 	"github.com/anle/codebase/internal/po"
 )
 
 type ITransactionRepo interface {
 	FindTransaction() ([]po.Transaction, error)
-	CreateTransaction(fromAccount dto.Account, toAccount dto.Account, amount int) error
+	CreateTransaction() error
 }
 
 type transactionRepo struct{}
 
 // CreateTransaction implements ITransactionRepo.
-func (tr *transactionRepo) CreateTransaction(fromAccount dto.Account, toAccount dto.Account, amount int) error {
+func (tr *transactionRepo) CreateTransaction() error {
 	panic("unimplemented")
 }
 
