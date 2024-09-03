@@ -9,7 +9,7 @@ import (
 )
 
 type ITransactionRepo interface {
-	FindTransaction() ([]po.Transaction, error)
+	FindTransaction(userID int) ([]dto.TransOutput, error)
 	CreateTransaction(userID int, fromAccount, toAccount dto.AccountOutput, transactionInput dto.TransCreateInput) error
 	CreateTransactionNoFromAccount(userID int, toAccount dto.AccountOutput, transactionInput dto.TransCreateInput) error
 	CreateTransactionNoToAccount(userID int, fromAccount dto.AccountOutput, transactionInput dto.TransCreateInput) error
@@ -131,8 +131,14 @@ func (tr *transactionRepo) CreateTransaction(userID int, fromAccount, toAccount 
 	return nil
 }
 
-func (tr *transactionRepo) FindTransaction() ([]po.Transaction, error) {
-	panic("unimplemented")
+func (ts *transactionRepo) FindTransaction(userID int) ([]dto.TransOutput, error) {
+	var transactions []dto.TransOutput
+	result := global.Mdb.Table("go_db_transaction").Where("userID = ?", userID).Find(&transactions)
+	if result.Error != nil {
+		return []dto.TransOutput{}, result.Error
+	}
+
+	return transactions, nil
 }
 
 func NewTransactionRepo(accountRepo IAccountRepo) ITransactionRepo {

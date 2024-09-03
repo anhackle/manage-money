@@ -12,7 +12,17 @@ type TransactionController struct {
 }
 
 func (tc *TransactionController) ListTransaction(c *gin.Context) {
-	panic("")
+	var (
+		userID       = c.GetInt("userID")
+		transactions []dto.TransOutput
+	)
+	result, transactions, err := tc.transactionService.ListTransaction(userID)
+	if err != nil {
+		response.ErrorResponseInternal(c, response.ErrCodeInternal, nil)
+		return
+	}
+
+	response.HandleResult(c, result, transactions)
 }
 
 func (tc *TransactionController) CreateTransaction(c *gin.Context) {

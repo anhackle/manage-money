@@ -12,9 +12,9 @@ type TransCreateInput struct {
 }
 
 type TransOutput struct {
-	Date          time.Time     `json:"date"`
-	Amount        int           `json:"amount"`
-	Description   string        `json:"description"`
-	FromAccountID AccountOutput `json:"fromAccount"`
-	ToAccountID   AccountOutput `json:"toACcount"`
+	Date          time.Time `gorm:"column:date; not null"`
+	Amount        int       `gorm:"column:amount; not null"`
+	Description   string    `gorm:"column:desc; not null"`
+	FromAccountID int       `gorm:"column:fromaccountID"`
+	ToAccountID   int       `gorm:"column:toaccountID"`
 }

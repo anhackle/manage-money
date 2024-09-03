@@ -4,14 +4,13 @@ import (
 	"errors"
 
 	"github.com/anle/codebase/internal/dto"
-	"github.com/anle/codebase/internal/po"
 	"github.com/anle/codebase/internal/repo"
 	"github.com/anle/codebase/response"
 	"gorm.io/gorm"
 )
 
 type ITransactionService interface {
-	ListTransaction() ([]po.Token, error)
+	ListTransaction(userID int) (int, []dto.TransOutput, error)
 	CreateTransaction(userID int, transactionInput dto.TransCreateInput) (int, error)
 }
 
@@ -20,12 +19,15 @@ type transactionService struct {
 	accountRepo     repo.IAccountRepo
 }
 
-// ListTransaction implements ITransactionService.
-func (ts *transactionService) ListTransaction() ([]po.Token, error) {
-	panic("unimplemented")
+func (ts *transactionService) ListTransaction(userID int) (int, []dto.TransOutput, error) {
+	transactions, err := ts.transactionRepo.FindTransaction(userID)
+	if err != nil {
+		return response.ErrCodeInternal, []dto.TransOutput{}, err
+	}
+
+	return response.ErrCodeSuccess, transactions, nil
 }
 
-// MakeTransaction implements ITransactionService.
 func (ts *transactionService) CreateTransaction(userID int, transactionInput dto.TransCreateInput) (int, error) {
 	if transactionInput.FromAccountID == nil && transactionInput.ToAccountID == nil {
 		return response.ErrCodeExternal, nil
