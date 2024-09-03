@@ -47,15 +47,6 @@ func (ts *transactionService) CreateTransaction(userID int, transactionInput dto
 		}
 	}
 
-	if transactionInput.ToAccountID == nil {
-		err = ts.transactionRepo.CreateTransactionNoToAccount(userID, fromAccount, transactionInput)
-		if err != nil {
-			return response.ErrCodeInternal, err
-		}
-
-		return response.ErrCodeSuccess, nil
-	}
-
 	if transactionInput.ToAccountID != nil {
 		toAccount, err = ts.accountRepo.FindAccountByID(userID, *transactionInput.ToAccountID)
 		if err != nil {
@@ -65,6 +56,15 @@ func (ts *transactionService) CreateTransaction(userID int, transactionInput dto
 
 			return response.ErrCodeInternal, nil
 		}
+	}
+
+	if transactionInput.ToAccountID == nil {
+		err = ts.transactionRepo.CreateTransactionNoToAccount(userID, fromAccount, transactionInput)
+		if err != nil {
+			return response.ErrCodeInternal, err
+		}
+
+		return response.ErrCodeSuccess, nil
 	}
 
 	if transactionInput.FromAccountID == nil {

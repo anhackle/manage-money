@@ -75,7 +75,7 @@ func (tr *transactionRepo) CreateTransactionNoToAccount(userID int, fromAccount 
 		Date:          time.Now(),
 		Amount:        transactionInput.Amount,
 		Description:   transactionInput.Description,
-		FromAccountID: transactionInput.ToAccountID,
+		FromAccountID: transactionInput.FromAccountID,
 		ToAccountID:   nil,
 		UserID:        userID,
 	}

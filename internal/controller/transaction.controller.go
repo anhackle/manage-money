@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"fmt"
-
 	"github.com/anle/codebase/internal/dto"
 	service "github.com/anle/codebase/internal/services"
 	"github.com/anle/codebase/response"
@@ -25,7 +23,6 @@ func (tc *TransactionController) CreateTransaction(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&transactionInput); err != nil {
 		response.ErrorResponseExternal(c, response.ErrCodeExternal, nil)
-		fmt.Println(err)
 		return
 	}
 
