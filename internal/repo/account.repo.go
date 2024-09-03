@@ -7,13 +7,35 @@ import (
 )
 
 type IAccountRepo interface {
-	FindAccount(userID int) ([]dto.AccountOutput, error)
+	UpdateAccountBalance(userID, accountID, balance int) error
+	FindAccountByUserID(userID int) ([]dto.AccountOutput, error)
+	FindAccountByID(userID int, accountID int) (dto.AccountOutput, error)
 	CreateAccount(userID int, accountInput dto.AccountCreateInput) error
 	UpdateAccount(userID int, accountInput dto.AccountUpdateInput) error
 	DeleteAccount(userID int, accountInput dto.AccountDeleteInput) error
 }
 
 type accountRepo struct{}
+
+func (ar *accountRepo) UpdateAccountBalance(userID, accountID, balance int) error {
+	result := global.Mdb.Table("go_db_account").Where("userID = ? AND id = ?", userID, accountID).Updates(
+		po.Account{
+			Balance: balance,
+		},
+	)
+
+	return result.Error
+}
+
+func (ar *accountRepo) FindAccountByID(userID int, accountID int) (dto.AccountOutput, error) {
+	var account dto.AccountOutput
+	result := global.Mdb.Table("go_db_account").Where("userID = ? AND id = ?", userID, accountID).First(&account)
+	if result.Error != nil {
+		return dto.AccountOutput{}, result.Error
+	}
+
+	return account, nil
+}
 
 // CreateAccount implements IAccountRepo.
 func (ar *accountRepo) CreateAccount(userID int, accountInput dto.AccountCreateInput) error {
@@ -27,7 +49,7 @@ func (ar *accountRepo) CreateAccount(userID int, accountInput dto.AccountCreateI
 	return result.Error
 }
 
-func (ar *accountRepo) FindAccount(userID int) ([]dto.AccountOutput, error) {
+func (ar *accountRepo) FindAccountByUserID(userID int) ([]dto.AccountOutput, error) {
 	var accounts []dto.AccountOutput
 	result := global.Mdb.Table("go_db_account").Where("userID = ?", userID).Find(&accounts)
 	if result.Error != nil {

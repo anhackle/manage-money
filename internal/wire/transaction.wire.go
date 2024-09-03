@@ -11,6 +11,7 @@ import (
 
 func InitTransactionRouterHandler() (*controller.TransactionController, error) {
 	wire.Build(
+		repo.NewAccountRepo,
 		repo.NewTransactionRepo,
 		service.NewTransactionService,
 		controller.NewTransactionController,

@@ -29,7 +29,7 @@ func (as *accountService) CreateAccount(userID int, accountInput dto.AccountCrea
 
 // ListAccount implements IAccountService.
 func (as *accountService) ListAccount(userID int) (int, []dto.AccountOutput, error) {
-	accounts, err := as.accountRepo.FindAccount(userID)
+	accounts, err := as.accountRepo.FindAccountByUserID(userID)
 	if err != nil {
 		return response.ErrCodeInternal, []dto.AccountOutput{}, err
 	}

@@ -24,8 +24,9 @@ func InitAccountRouterHandler() (*controller.AccountController, error) {
 // Injectors from transaction.wire.go:
 
 func InitTransactionRouterHandler() (*controller.TransactionController, error) {
-	iTransactionRepo := repo.NewTransactionRepo()
-	iTransactionService := service.NewTransactionService(iTransactionRepo)
+	iAccountRepo := repo.NewAccountRepo()
+	iTransactionRepo := repo.NewTransactionRepo(iAccountRepo)
+	iTransactionService := service.NewTransactionService(iTransactionRepo, iAccountRepo)
 	transactionController := controller.NewTransactionController(iTransactionService)
 	return transactionController, nil
 }
