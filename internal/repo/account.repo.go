@@ -51,6 +51,7 @@ func (ar *accountRepo) CreateAccount(userID int, accountInput dto.AccountCreateI
 
 func (ar *accountRepo) FindAccountByUserID(userID int) ([]dto.AccountOutput, error) {
 	var accounts []dto.AccountOutput
+	//TODO: pagination !
 	result := global.Mdb.Table("go_db_account").Where("userID = ?", userID).Find(&accounts)
 	if result.Error != nil {
 		return []dto.AccountOutput{}, result.Error

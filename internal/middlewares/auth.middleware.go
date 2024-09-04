@@ -1,10 +1,9 @@
 package middlewares
 
 import (
-	"context"
 	"strings"
 
-	"github.com/anle/codebase/global"
+	service "github.com/anle/codebase/internal/services"
 	"github.com/anle/codebase/response"
 	"github.com/gin-gonic/gin"
 )
@@ -13,8 +12,11 @@ var (
 	headerName = "Authorization"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
-	//TODO: Use DI for AuthMiddleware
+type AuthMiddleware struct {
+	authService service.IAuthService
+}
+
+func (am *AuthMiddleware) Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		headerValue := c.GetHeader(headerName)
 		if headerValue == "" {
@@ -31,7 +33,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		accessToken := arrayHeaderValues[1]
-		userID, err := global.Rdb.Get(context.Background(), accessToken).Int()
+		userID, err := am.authService.Authentication(accessToken)
 		if err != nil {
 			response.ErrorResponseNoLogin(c, response.ErrTokenInvalid, nil)
 			c.Abort()
@@ -41,6 +43,11 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Set("userID", userID)
 
 		c.Next()
+	}
+}
 
+func NewAuthMiddleware(authService service.IAuthService) *AuthMiddleware {
+	return &AuthMiddleware{
+		authService: authService,
 	}
 }

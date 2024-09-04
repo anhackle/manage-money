@@ -8,6 +8,7 @@ package wire
 
 import (
 	"github.com/anle/codebase/internal/controller"
+	"github.com/anle/codebase/internal/middlewares"
 	"github.com/anle/codebase/internal/repo"
 	"github.com/anle/codebase/internal/services"
 )
@@ -19,6 +20,15 @@ func InitAccountRouterHandler() (*controller.AccountController, error) {
 	iAccountService := service.NewAccountService(iAccountRepo)
 	accountController := controller.NewAccountController(iAccountService)
 	return accountController, nil
+}
+
+// Injectors from middleware.wire.go:
+
+func InitMiddlewareHandler() (*middlewares.AuthMiddleware, error) {
+	iTokenRepo := repo.NewTokenRepo()
+	iAuthService := service.NewAuthService(iTokenRepo)
+	authMiddleware := middlewares.NewAuthMiddleware(iAuthService)
+	return authMiddleware, nil
 }
 
 // Injectors from transaction.wire.go:
