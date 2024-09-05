@@ -18,7 +18,7 @@ type IAccountRepo interface {
 type accountRepo struct{}
 
 func (ar *accountRepo) UpdateAccountBalance(userID, accountID, balance int) error {
-	result := global.Mdb.Table("go_db_account").Where("userID = ? AND id = ?", userID, accountID).Select("balance").Updates(
+	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountID).Select("balance").Updates(
 		po.Account{
 			Balance: balance,
 		},
@@ -29,7 +29,7 @@ func (ar *accountRepo) UpdateAccountBalance(userID, accountID, balance int) erro
 
 func (ar *accountRepo) FindAccountByID(userID int, accountID int) (dto.AccountOutput, error) {
 	var account dto.AccountOutput
-	result := global.Mdb.Table("go_db_account").Where("userID = ? AND id = ?", userID, accountID).First(&account)
+	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountID).First(&account)
 	if result.Error != nil {
 		return dto.AccountOutput{}, result.Error
 	}
@@ -52,7 +52,7 @@ func (ar *accountRepo) CreateAccount(userID int, accountInput dto.AccountCreateI
 func (ar *accountRepo) FindAccountByUserID(userID int) ([]dto.AccountOutput, error) {
 	var accounts []dto.AccountOutput
 	//TODO: pagination !
-	result := global.Mdb.Table("go_db_account").Where("userID = ?", userID).Find(&accounts)
+	result := global.Mdb.Model(&po.Account{}).Where("userID = ?", userID).Find(&accounts)
 	if result.Error != nil {
 		return []dto.AccountOutput{}, result.Error
 	}
@@ -61,12 +61,12 @@ func (ar *accountRepo) FindAccountByUserID(userID int) ([]dto.AccountOutput, err
 }
 
 func (ar *accountRepo) DeleteAccount(userID int, accountInput dto.AccountDeleteInput) error {
-	result := global.Mdb.Table("go_db_account").Where("userID = ? AND id = ?", userID, accountInput.ID).Delete(&po.Account{})
+	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountInput.ID).Delete(&po.Account{})
 	return result.Error
 }
 
 func (ar *accountRepo) UpdateAccount(userID int, accountInput dto.AccountUpdateInput) error {
-	result := global.Mdb.Table("go_db_account").Where("userID = ? AND id = ?", userID, accountInput.ID).Select("accountName", "description").Updates(
+	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountInput.ID).Select("accountName", "description").Updates(
 		po.Account{
 			AccountName: accountInput.AccountName,
 			Description: accountInput.Description,

@@ -134,7 +134,7 @@ func (tr *transactionRepo) CreateTransaction(userID int, fromAccount, toAccount 
 func (ts *transactionRepo) FindTransaction(userID int) ([]dto.TransOutput, error) {
 	var transactions []dto.TransOutput
 	//TODO: pagination !
-	result := global.Mdb.Table("go_db_transaction").Where("userID = ?", userID).Find(&transactions)
+	result := global.Mdb.Model(&po.Token{}).Where("userID = ?", userID).Find(&transactions)
 	if result.Error != nil {
 		return []dto.TransOutput{}, result.Error
 	}
