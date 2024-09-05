@@ -12,7 +12,7 @@ type Transaction struct {
 	UserID        int       `gorm:"column:userID; not null"`
 	FromAccount   Account   `gorm:"foreignKey:FromAccountID;references:ID"`
 	ToAccount     Account   `gorm:"foreignKey:ToAccountID;references:ID"`
-	User          User      `gorm:foreignKey:UserID;references:ID"`
+	User          User      `gorm:"foreignKey:UserID;references:ID"`
 }
 
 func (t *Transaction) TableName() string {
