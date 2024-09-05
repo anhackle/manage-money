@@ -6,7 +6,7 @@ type Account struct {
 	Description string `gorm:"column:description"`
 	Balance     int    `gorm:"column:balance;default=0"`
 	UserID      int    `gorm:"column:userID; not null"`
-	User        User   `gorm:"foreignKey:UserID"`
+	User        User   `gorm:foreignKey:UserID;references:ID`
 }
 
 func (t *Account) TableName() string {
