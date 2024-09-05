@@ -33,6 +33,10 @@ func (ts *transactionService) CreateTransaction(userID int, transactionInput dto
 		return response.ErrCodeExternal, nil
 	}
 
+	if *transactionInput.FromAccountID == *transactionInput.ToAccountID {
+		return response.ErrCodeExternal, nil
+	}
+
 	var (
 		fromAccount, toAccount dto.AccountOutput
 		err                    error
