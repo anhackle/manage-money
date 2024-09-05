@@ -18,7 +18,7 @@ type IAccountRepo interface {
 type accountRepo struct{}
 
 func (ar *accountRepo) UpdateAccountBalance(userID, accountID, balance int) error {
-	result := global.Mdb.Table("go_db_account").Where("userID = ? AND id = ?", userID, accountID).Updates(
+	result := global.Mdb.Table("go_db_account").Where("userID = ? AND id = ?", userID, accountID).Select("balance").Updates(
 		po.Account{
 			Balance: balance,
 		},
@@ -66,7 +66,7 @@ func (ar *accountRepo) DeleteAccount(userID int, accountInput dto.AccountDeleteI
 }
 
 func (ar *accountRepo) UpdateAccount(userID int, accountInput dto.AccountUpdateInput) error {
-	result := global.Mdb.Table("go_db_account").Where("userID = ? AND id = ?", userID, accountInput.ID).Updates(
+	result := global.Mdb.Table("go_db_account").Where("userID = ? AND id = ?", userID, accountInput.ID).Select("accountName", "description").Updates(
 		po.Account{
 			AccountName: accountInput.AccountName,
 			Description: accountInput.Description,
