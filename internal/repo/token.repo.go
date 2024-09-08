@@ -10,30 +10,27 @@ import (
 
 type ITokenRepo interface {
 	CreateToken(user po.User, accessToken string) error
-	FindUserByToken(accessToken string) (po.User, error)
+	FindUserIDByToken(accessToken string) (int, error)
 }
 
 type tokenRepo struct{}
 
-func (gtr *tokenRepo) FindUserByToken(accessToken string) (po.User, error) {
-	var token po.Token
-	result := global.Mdb.Where("token = ?", accessToken).Preload("User").First(&token)
-	if result.Error != nil {
-		return po.User{}, result.Error
+func (gtr *tokenRepo) FindUserIDByToken(accessToken string) (int, error) {
+	userID, err := global.Rdb.Get(ctx, accessToken).Int()
+	if err != nil {
+		return -1, err
 	}
-	fmt.Println(token)
 
-	return token.User, nil
+	return userID, nil
 }
 
 func (gtr *tokenRepo) CreateToken(user po.User, accessToken string) error {
-	// TODO: Add this token to Redis instead of Mysql
-	err := global.Rdb.SetEx(ctx, accessToken, user.Email, 3600*time.Second).Err()
+	err := global.Rdb.SetEx(ctx, accessToken, user.ID, 3600*time.Second).Err()
 	if err != nil {
 		return err
 	}
 
-	err = global.Rdb.SetEx(ctx, user.Email, accessToken, 3600*time.Second).Err()
+	err = global.Rdb.SetEx(ctx, fmt.Sprintf("%d", user.ID), accessToken, 3600*time.Second).Err()
 	if err != nil {
 		return err
 	}

@@ -8,9 +8,38 @@ package wire
 
 import (
 	"github.com/anle/codebase/internal/controller"
+	"github.com/anle/codebase/internal/middlewares"
 	"github.com/anle/codebase/internal/repo"
 	"github.com/anle/codebase/internal/services"
 )
+
+// Injectors from account.wire.go:
+
+func InitAccountRouterHandler() (*controller.AccountController, error) {
+	iAccountRepo := repo.NewAccountRepo()
+	iAccountService := service.NewAccountService(iAccountRepo)
+	accountController := controller.NewAccountController(iAccountService)
+	return accountController, nil
+}
+
+// Injectors from middleware.wire.go:
+
+func InitMiddlewareHandler() (*middlewares.AuthMiddleware, error) {
+	iTokenRepo := repo.NewTokenRepo()
+	iAuthService := service.NewAuthService(iTokenRepo)
+	authMiddleware := middlewares.NewAuthMiddleware(iAuthService)
+	return authMiddleware, nil
+}
+
+// Injectors from transaction.wire.go:
+
+func InitTransactionRouterHandler() (*controller.TransactionController, error) {
+	iAccountRepo := repo.NewAccountRepo()
+	iTransactionRepo := repo.NewTransactionRepo(iAccountRepo)
+	iTransactionService := service.NewTransactionService(iTransactionRepo, iAccountRepo)
+	transactionController := controller.NewTransactionController(iTransactionService)
+	return transactionController, nil
+}
 
 // Injectors from user.wire.go:
 
