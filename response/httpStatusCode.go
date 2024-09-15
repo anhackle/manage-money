@@ -9,6 +9,8 @@ const (
 	ErrCodeNegativeAmount   = 40004
 	ErrCodeNotEnoughBalance = 40005
 	ErrCodeAccountNotExist  = 40006
+	ErrCodeGroupNotExist    = 40007
+	ErrCodePercentageExceed = 40008
 	ErrTokenInvalid         = 40100
 	ErrCodeInternal         = 50000
 )
@@ -23,6 +25,8 @@ var msg = map[int]string{
 	ErrCodeNegativeAmount:   "Amount must be greater than 0",
 	ErrCodeNotEnoughBalance: "Balance not enough",
 	ErrCodeAccountNotExist:  "Account not exist",
+	ErrCodeGroupNotExist:    "Group not exist",
+	ErrCodePercentageExceed: "Percentage Exceed",
 	ErrTokenInvalid:         "Authorization required",
 	ErrCodeUserHasExists:    "User existed",
 }

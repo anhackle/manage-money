@@ -6,113 +6,37 @@ import (
 	"github.com/anle/codebase/global"
 	"github.com/anle/codebase/internal/dto"
 	"github.com/anle/codebase/internal/po"
+	"gorm.io/gorm"
 )
 
 type ITransactionRepo interface {
+	BeginTransaction() (*gorm.DB, error)
+	CommitTransaction(tx *gorm.DB) error
+	RollbackTransaction(tx *gorm.DB) error
 	FindTransaction(userID int) ([]dto.TransOutput, error)
-	CreateTransaction(userID int, fromAccount, toAccount dto.AccountOutput, transactionInput dto.TransCreateInput) error
-	CreateTransactionNoFromAccount(userID int, toAccount dto.AccountOutput, transactionInput dto.TransCreateInput) error
-	CreateTransactionNoToAccount(userID int, fromAccount dto.AccountOutput, transactionInput dto.TransCreateInput) error
+	CreateTransaction(tx *gorm.DB, userID int, fromAccount, toAccount *dto.AccountOutput, transactionInput dto.TransCreateInput) error
 }
 
 type transactionRepo struct {
-	accountRepo IAccountRepo
 }
 
-func (tr *transactionRepo) CreateTransactionNoFromAccount(userID int, toAccount dto.AccountOutput, transactionInput dto.TransCreateInput) error {
+func (tr *transactionRepo) BeginTransaction() (*gorm.DB, error) {
 	tx := global.Mdb.Begin()
-
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
-	// Add toAccount
-	err := tr.accountRepo.UpdateAccountBalance(userID, *transactionInput.ToAccountID, toAccount.Balance+transactionInput.Amount)
-	if err != nil {
-		tx.Rollback()
-		return err
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
-
-	//Create transaction
-	var transaction = po.Transaction{
-		Date:          time.Now(),
-		Amount:        transactionInput.Amount,
-		Description:   transactionInput.Description,
-		FromAccountID: nil,
-		ToAccountID:   transactionInput.ToAccountID,
-		UserID:        userID,
-	}
-	result := global.Mdb.Create(&transaction)
-	if result.Error != nil {
-		tx.Rollback()
-		return result.Error
-	}
-
-	tx.Commit()
-	return nil
+	return tx, nil
 }
 
-func (tr *transactionRepo) CreateTransactionNoToAccount(userID int, fromAccount dto.AccountOutput, transactionInput dto.TransCreateInput) error {
-	tx := global.Mdb.Begin()
-
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
-	// Deduct fromAccount
-	err := tr.accountRepo.UpdateAccountBalance(userID, *transactionInput.FromAccountID, fromAccount.Balance-transactionInput.Amount)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	//Create transaction
-	var transaction = po.Transaction{
-		Date:          time.Now(),
-		Amount:        transactionInput.Amount,
-		Description:   transactionInput.Description,
-		FromAccountID: transactionInput.FromAccountID,
-		ToAccountID:   nil,
-		UserID:        userID,
-	}
-	result := global.Mdb.Create(&transaction)
-	if result.Error != nil {
-		tx.Rollback()
-		return result.Error
-	}
-
-	tx.Commit()
-	return nil
+func (tr *transactionRepo) CommitTransaction(tx *gorm.DB) error {
+	return tx.Commit().Error
 }
 
-func (tr *transactionRepo) CreateTransaction(userID int, fromAccount, toAccount dto.AccountOutput, transactionInput dto.TransCreateInput) error {
-	tx := global.Mdb.Begin()
+func (tr *transactionRepo) RollbackTransaction(tx *gorm.DB) error {
+	return tx.Rollback().Error
+}
 
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
-	//Deduct fromAccount
-	err := tr.accountRepo.UpdateAccountBalance(userID, *transactionInput.FromAccountID, fromAccount.Balance-transactionInput.Amount)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	//Add toAccount
-	err = tr.accountRepo.UpdateAccountBalance(userID, *transactionInput.ToAccountID, toAccount.Balance+transactionInput.Amount)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	//Create transaction
+func (tr *transactionRepo) CreateTransaction(tx *gorm.DB, userID int, fromAccount, toAccount *dto.AccountOutput, transactionInput dto.TransCreateInput) error {
 	var transaction = po.Transaction{
 		Date:          time.Now(),
 		Amount:        transactionInput.Amount,
@@ -121,20 +45,18 @@ func (tr *transactionRepo) CreateTransaction(userID int, fromAccount, toAccount 
 		ToAccountID:   transactionInput.ToAccountID,
 		UserID:        userID,
 	}
-	result := global.Mdb.Create(&transaction)
+	result := tx.Create(&transaction)
 	if result.Error != nil {
-		tx.Rollback()
 		return result.Error
 	}
 
-	tx.Commit()
 	return nil
 }
 
 func (ts *transactionRepo) FindTransaction(userID int) ([]dto.TransOutput, error) {
 	var transactions []dto.TransOutput
 	//TODO: pagination !
-	result := global.Mdb.Model(&po.Token{}).Where("userID = ?", userID).Find(&transactions)
+	result := global.Mdb.Model(&po.Transaction{}).Where("userID = ?", userID).Find(&transactions)
 	if result.Error != nil {
 		return []dto.TransOutput{}, result.Error
 	}
@@ -142,8 +64,6 @@ func (ts *transactionRepo) FindTransaction(userID int) ([]dto.TransOutput, error
 	return transactions, nil
 }
 
-func NewTransactionRepo(accountRepo IAccountRepo) ITransactionRepo {
-	return &transactionRepo{
-		accountRepo: accountRepo,
-	}
+func NewTransactionRepo() ITransactionRepo {
+	return &transactionRepo{}
 }

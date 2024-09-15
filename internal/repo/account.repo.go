@@ -4,12 +4,14 @@ import (
 	"github.com/anle/codebase/global"
 	"github.com/anle/codebase/internal/dto"
 	"github.com/anle/codebase/internal/po"
+	"gorm.io/gorm"
 )
 
 type IAccountRepo interface {
-	UpdateAccountBalance(userID, accountID, balance int) error
+	UpdateAccountBalance(tx *gorm.DB, userID, accountID, balance int) error
 	FindAccountByUserID(userID int) ([]dto.AccountOutput, error)
-	FindAccountByID(userID int, accountID int) (dto.AccountOutput, error)
+	FindAccountByID(userID int, accountID int) (*dto.AccountOutput, error)
+	FindAccountByIDWithTx(tx *gorm.DB, userID int, accountID int) (*dto.AccountOutput, error)
 	CreateAccount(userID int, accountInput dto.AccountCreateInput) error
 	UpdateAccount(userID int, accountInput dto.AccountUpdateInput) error
 	DeleteAccount(userID int, accountInput dto.AccountDeleteInput) error
@@ -17,8 +19,8 @@ type IAccountRepo interface {
 
 type accountRepo struct{}
 
-func (ar *accountRepo) UpdateAccountBalance(userID, accountID, balance int) error {
-	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountID).Select("balance").Updates(
+func (ar *accountRepo) UpdateAccountBalance(tx *gorm.DB, userID, accountID, balance int) error {
+	result := tx.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountID).Select("balance").Updates(
 		po.Account{
 			Balance: balance,
 		},
@@ -27,20 +29,30 @@ func (ar *accountRepo) UpdateAccountBalance(userID, accountID, balance int) erro
 	return result.Error
 }
 
-func (ar *accountRepo) FindAccountByID(userID int, accountID int) (dto.AccountOutput, error) {
-	var account dto.AccountOutput
+func (ar *accountRepo) FindAccountByID(userID int, accountID int) (*dto.AccountOutput, error) {
+	var account *dto.AccountOutput
 	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountID).First(&account)
 	if result.Error != nil {
-		return dto.AccountOutput{}, result.Error
+		return &dto.AccountOutput{}, result.Error
 	}
 
 	return account, nil
 }
 
-// CreateAccount implements IAccountRepo.
+func (ar *accountRepo) FindAccountByIDWithTx(tx *gorm.DB, userID int, accountID int) (*dto.AccountOutput, error) {
+	var account *dto.AccountOutput
+	result := tx.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountID).First(&account)
+	if result.Error != nil {
+		return &dto.AccountOutput{}, result.Error
+	}
+
+	return account, nil
+}
+
 func (ar *accountRepo) CreateAccount(userID int, accountInput dto.AccountCreateInput) error {
 	var account = po.Account{
-		AccountName: accountInput.AccountName,
+		Type:        0,
+		Name:        accountInput.AccountName,
 		Description: accountInput.Description,
 		UserID:      userID,
 	}
@@ -52,7 +64,7 @@ func (ar *accountRepo) CreateAccount(userID int, accountInput dto.AccountCreateI
 func (ar *accountRepo) FindAccountByUserID(userID int) ([]dto.AccountOutput, error) {
 	var accounts []dto.AccountOutput
 	//TODO: pagination !
-	result := global.Mdb.Model(&po.Account{}).Where("userID = ?", userID).Find(&accounts)
+	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND type = 0", userID).Find(&accounts)
 	if result.Error != nil {
 		return []dto.AccountOutput{}, result.Error
 	}
@@ -66,9 +78,9 @@ func (ar *accountRepo) DeleteAccount(userID int, accountInput dto.AccountDeleteI
 }
 
 func (ar *accountRepo) UpdateAccount(userID int, accountInput dto.AccountUpdateInput) error {
-	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountInput.ID).Select("accountName", "description").Updates(
+	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountInput.ID).Select("name", "description").Updates(
 		po.Account{
-			AccountName: accountInput.AccountName,
+			Name:        accountInput.AccountName,
 			Description: accountInput.Description,
 		},
 	)

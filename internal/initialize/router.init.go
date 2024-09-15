@@ -21,6 +21,8 @@ func InitRouter() *gin.Engine {
 	userRouter := routers.RouterGroupApp.User
 	accountRouter := routers.RouterGroupApp.Account
 	transactionRouter := routers.RouterGroupApp.Transaction
+	groupRouter := routers.RouterGroupApp.Group
+	groupDisRouter := routers.RouterGroupApp.GroupDis
 
 	MainGroup := r.Group("/v1")
 	MainGroup.Use(middlewares.CORSMiddleware())
@@ -29,6 +31,8 @@ func InitRouter() *gin.Engine {
 		userRouter.InitUserRouter(MainGroup)
 		accountRouter.InitAccountRouter(MainGroup)
 		transactionRouter.InitTransactionRouter(MainGroup)
+		groupRouter.InitGroupRouter(MainGroup)
+		groupDisRouter.InitGroupDisRouter(MainGroup)
 	}
 
 	return r

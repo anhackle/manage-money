@@ -4,7 +4,8 @@ import "gorm.io/gorm"
 
 type Account struct {
 	ID          int            `gorm:"primaryKey, column:id; autoIncrement; not null; unique"`
-	AccountName string         `gorm:"column:accountName; not null"`
+	Type        int            `gorm:"column:type; not null"`
+	Name        string         `gorm:"column:name; not null"`
 	Description string         `gorm:"column:description"`
 	Balance     int            `gorm:"column:balance;default=0"`
 	UserID      int            `gorm:"column:userID; not null"`

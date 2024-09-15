@@ -9,14 +9,14 @@ import (
 	"github.com/google/wire"
 )
 
-func InitTransactionRouterHandler() (*controller.TransactionController, error) {
+func InitGroupDisRouterHandler() (*controller.GroupDisController, error) {
 	wire.Build(
 		repo.NewGroupDisRepo,
+		repo.NewGroupRepo,
 		repo.NewAccountRepo,
-		repo.NewTransactionRepo,
-		service.NewTransactionService,
-		controller.NewTransactionController,
+		service.NewGroupDisService,
+		controller.NewGroupDisController,
 	)
 
-	return new(controller.TransactionController), nil
+	return new(controller.GroupDisController), nil
 }

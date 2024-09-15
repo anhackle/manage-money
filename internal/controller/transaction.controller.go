@@ -36,7 +36,7 @@ func (tc *TransactionController) CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	result, _ := tc.transactionService.CreateTransaction(userID, transactionInput)
+	result, _ := tc.transactionService.MakeTransaction(userID, transactionInput)
 
 	response.HandleResult(c, result, nil)
 
