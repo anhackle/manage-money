@@ -9,12 +9,12 @@ import (
 
 type IAccountRepo interface {
 	UpdateAccountBalance(tx *gorm.DB, userID, accountID, balance int) error
-	FindAccountByUserID(userID int) ([]dto.AccountOutput, error)
+	FindAccountByUserID(userID int, accountInput *dto.AccountListInput) ([]dto.AccountOutput, error)
 	FindAccountByID(userID int, accountID int) (*dto.AccountOutput, error)
 	FindAccountByIDWithTx(tx *gorm.DB, userID int, accountID int) (*dto.AccountOutput, error)
 	CreateAccount(userID int, accountInput dto.AccountCreateInput) error
-	UpdateAccount(userID int, accountInput dto.AccountUpdateInput) error
-	DeleteAccount(userID int, accountInput dto.AccountDeleteInput) error
+	UpdateAccount(userID int, accountInput dto.AccountUpdateInput) (*gorm.DB, error)
+	DeleteAccount(userID int, accountInput dto.AccountDeleteInput) (*gorm.DB, error)
 }
 
 type accountRepo struct{}
@@ -61,10 +61,13 @@ func (ar *accountRepo) CreateAccount(userID int, accountInput dto.AccountCreateI
 	return result.Error
 }
 
-func (ar *accountRepo) FindAccountByUserID(userID int) ([]dto.AccountOutput, error) {
+func (ar *accountRepo) FindAccountByUserID(userID int, accountInput *dto.AccountListInput) ([]dto.AccountOutput, error) {
 	var accounts []dto.AccountOutput
-	//TODO: pagination !
-	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND type = 0", userID).Find(&accounts)
+	result := global.Mdb.Model(&po.Account{}).
+		Where("userID = ? AND type = 0", userID).
+		Limit(accountInput.PageSize).
+		Offset((accountInput.Page - 1) * accountInput.PageSize).
+		Find(&accounts)
 	if result.Error != nil {
 		return []dto.AccountOutput{}, result.Error
 	}
@@ -72,12 +75,12 @@ func (ar *accountRepo) FindAccountByUserID(userID int) ([]dto.AccountOutput, err
 	return accounts, nil
 }
 
-func (ar *accountRepo) DeleteAccount(userID int, accountInput dto.AccountDeleteInput) error {
+func (ar *accountRepo) DeleteAccount(userID int, accountInput dto.AccountDeleteInput) (*gorm.DB, error) {
 	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountInput.ID).Delete(&po.Account{})
-	return result.Error
+	return result, result.Error
 }
 
-func (ar *accountRepo) UpdateAccount(userID int, accountInput dto.AccountUpdateInput) error {
+func (ar *accountRepo) UpdateAccount(userID int, accountInput dto.AccountUpdateInput) (*gorm.DB, error) {
 	result := global.Mdb.Model(&po.Account{}).Where("userID = ? AND id = ?", userID, accountInput.ID).Select("name", "description").Updates(
 		po.Account{
 			Name:        accountInput.AccountName,
@@ -85,7 +88,7 @@ func (ar *accountRepo) UpdateAccount(userID int, accountInput dto.AccountUpdateI
 		},
 	)
 
-	return result.Error
+	return result, result.Error
 }
 
 func NewAccountRepo() IAccountRepo {

@@ -8,6 +8,11 @@ type AccountOutput struct {
 	Balance     int    `json:"balance" gorm:"column:balance"`
 }
 
+type AccountListInput struct {
+	Page     int `json:"page" binding:"required,number,gt=0"`
+	PageSize int `json:"pagesize" binding:"required,number,gt=0,lt=50"`
+}
+
 type AccountCreateInput struct {
 	AccountName string `json:"accountName" binding:"required,ascii,max=50"`
 	Description string `json:"description" binding:"required,ascii,max=255"`

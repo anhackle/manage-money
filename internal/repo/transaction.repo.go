@@ -13,7 +13,7 @@ type ITransactionRepo interface {
 	BeginTransaction() (*gorm.DB, error)
 	CommitTransaction(tx *gorm.DB) error
 	RollbackTransaction(tx *gorm.DB) error
-	FindTransaction(userID int) ([]dto.TransOutput, error)
+	FindTransaction(userID int, transactionInput *dto.TransListInput) ([]dto.TransOutput, error)
 	CreateTransaction(tx *gorm.DB, userID int, fromAccount, toAccount *dto.AccountOutput, transactionInput dto.TransCreateInput) error
 }
 
@@ -53,10 +53,14 @@ func (tr *transactionRepo) CreateTransaction(tx *gorm.DB, userID int, fromAccoun
 	return nil
 }
 
-func (ts *transactionRepo) FindTransaction(userID int) ([]dto.TransOutput, error) {
+func (ts *transactionRepo) FindTransaction(userID int, transactionInput *dto.TransListInput) ([]dto.TransOutput, error) {
 	var transactions []dto.TransOutput
-	//TODO: pagination !
-	result := global.Mdb.Model(&po.Transaction{}).Where("userID = ?", userID).Find(&transactions)
+	result := global.Mdb.
+		Model(&po.Transaction{}).
+		Where("userID = ?", userID).
+		Limit(transactionInput.PageSize).
+		Offset((transactionInput.Page - 1) * transactionInput.PageSize).
+		Find(&transactions)
 	if result.Error != nil {
 		return []dto.TransOutput{}, result.Error
 	}

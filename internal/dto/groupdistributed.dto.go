@@ -1,6 +1,6 @@
 package dto
 
-type GroupDisListinput struct {
+type GroupDisListInput struct {
 	GroupID int `json:"groupID" binding:"required,number,min=0"`
 }
 

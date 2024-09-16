@@ -6,6 +6,11 @@ type GroupOutput struct {
 	Description string `json:"description" gorm:"column:description"`
 }
 
+type GroupListInput struct {
+	Page     int `json:"page" binding:"required,number,gt=0"`
+	PageSize int `json:"pagesize" binding:"required,number,gt=0,lt=50"`
+}
+
 type GroupCreateInput struct {
 	GroupName   string `json:"groupName" binding:"required,ascii,max=50"`
 	Description string `json:"description" binding:"required,ascii,max=255"`

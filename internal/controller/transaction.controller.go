@@ -13,10 +13,16 @@ type TransactionController struct {
 
 func (tc *TransactionController) ListTransaction(c *gin.Context) {
 	var (
-		userID       = c.GetInt("userID")
-		transactions []dto.TransOutput
+		transactionInput *dto.TransListInput
+		userID           = c.GetInt("userID")
+		transactions     []dto.TransOutput
 	)
-	result, transactions, err := tc.transactionService.ListTransaction(userID)
+	if err := c.ShouldBindJSON(&transactionInput); err != nil {
+		response.ErrorResponseExternal(c, response.ErrCodeExternal, nil)
+		return
+	}
+
+	result, transactions, err := tc.transactionService.ListTransaction(userID, transactionInput)
 	if err != nil {
 		response.ErrorResponseInternal(c, response.ErrCodeInternal, nil)
 		return

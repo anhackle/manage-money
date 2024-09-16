@@ -13,11 +13,12 @@ type GroupController struct {
 
 func (gc *GroupController) ListGroup(c *gin.Context) {
 	var (
-		userID = c.GetInt("userID")
-		groups []dto.GroupOutput
+		groupInput *dto.GroupListInput
+		userID     = c.GetInt("userID")
+		groups     []dto.GroupOutput
 	)
 
-	result, groups, err := gc.groupService.ListGroup(userID)
+	result, groups, err := gc.groupService.ListGroup(userID, groupInput)
 	if err != nil {
 		response.ErrorResponseInternal(c, response.ErrCodeInternal, nil)
 		return

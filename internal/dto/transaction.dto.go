@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+type TransListInput struct {
+	Page     int `json:"page" binding:"required,number,gt=0"`
+	PageSize int `json:"pagesize" binding:"required,number,gt=0,lt=50"`
+}
+
 type TransCreateInput struct {
 	Amount        int    `json:"amount" binding:"required,number,gt=0"`
 	Description   string `json:"description"`

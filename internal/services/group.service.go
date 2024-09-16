@@ -7,7 +7,7 @@ import (
 )
 
 type IGroupService interface {
-	ListGroup(userID int) (int, []dto.GroupOutput, error)
+	ListGroup(userID int, groupInput *dto.GroupListInput) (int, []dto.GroupOutput, error)
 	CreateGroup(userID int, account dto.GroupCreateInput) (int, error)
 	UpdateGroup(userID int, account dto.GroupUpdateInput) (int, error)
 	DeleteGroup(userID int, account dto.GroupDeleteInput) (int, error)
@@ -26,8 +26,8 @@ func (gs *groupService) CreateGroup(userID int, groupInput dto.GroupCreateInput)
 	return response.ErrCodeSuccess, nil
 }
 
-func (gs *groupService) ListGroup(userID int) (int, []dto.GroupOutput, error) {
-	accounts, err := gs.groupRepo.FindGroupByUserID(userID)
+func (gs *groupService) ListGroup(userID int, groupInput *dto.GroupListInput) (int, []dto.GroupOutput, error) {
+	accounts, err := gs.groupRepo.FindGroupByUserID(userID, groupInput)
 	if err != nil {
 		return response.ErrCodeInternal, []dto.GroupOutput{}, err
 	}
@@ -36,18 +36,26 @@ func (gs *groupService) ListGroup(userID int) (int, []dto.GroupOutput, error) {
 }
 
 func (gs *groupService) DeleteGroup(userID int, groupInput dto.GroupDeleteInput) (int, error) {
-	err := gs.groupRepo.DeleteGroup(userID, groupInput)
+	result, err := gs.groupRepo.DeleteGroup(userID, groupInput)
 	if err != nil {
 		return response.ErrCodeInternal, err
+	}
+
+	if result.RowsAffected == 0 {
+		return response.ErrCodeGroupNotExist, err
 	}
 
 	return response.ErrCodeSuccess, nil
 }
 
 func (gs *groupService) UpdateGroup(userID int, groupInput dto.GroupUpdateInput) (int, error) {
-	err := gs.groupRepo.UpdateGroup(userID, groupInput)
+	result, err := gs.groupRepo.UpdateGroup(userID, groupInput)
 	if err != nil {
 		return response.ErrCodeInternal, err
+	}
+
+	if result.RowsAffected == 0 {
+		return response.ErrCodeGroupNotExist, err
 	}
 
 	return response.ErrCodeSuccess, nil

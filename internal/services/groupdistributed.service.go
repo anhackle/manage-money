@@ -10,7 +10,7 @@ import (
 )
 
 type IGroupDisService interface {
-	ListAccountFromGroup(userID int, groupDisInput dto.GroupDisListinput) (int, []dto.GroupDisOutput, error)
+	ListAccountFromGroup(userID int, groupDisInput dto.GroupDisListInput) (int, []dto.GroupDisOutput, error)
 	AddAccountToGroup(userID int, groupDisInput dto.GroupDisCreateInput) (int, error)
 	DeleteAccountFromGroup(userID int, groupDisInput dto.GroupDisDeleteInput) (int, error)
 }
@@ -21,12 +21,17 @@ type groupDisService struct {
 	accountRepo  repo.IAccountRepo
 }
 
-func (gds *groupDisService) ListAccountFromGroup(userID int, groupDisInput dto.GroupDisListinput) (int, []dto.GroupDisOutput, error) {
+func (gds *groupDisService) ListAccountFromGroup(userID int, groupDisInput dto.GroupDisListInput) (int, []dto.GroupDisOutput, error) {
 	_, err := gds.groupRepo.FindGroupByID(userID, groupDisInput.GroupID)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return response.ErrCodeGroupNotExist, []dto.GroupDisOutput{}, err
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.ErrCodeGroupNotExist, []dto.GroupDisOutput{}, err
+		}
+
+		return response.ErrCodeInternal, []dto.GroupDisOutput{}, err
 	}
-	groupDistributed, err := gds.groupDisRepo.FindGroupDisByUserID(userID, groupDisInput)
+
+	groupDistributed, err := gds.groupDisRepo.FindGroupDisByGroupID(userID, groupDisInput)
 	if err != nil {
 		return response.ErrCodeInternal, []dto.GroupDisOutput{}, err
 	}
@@ -36,13 +41,21 @@ func (gds *groupDisService) ListAccountFromGroup(userID int, groupDisInput dto.G
 
 func (gds *groupDisService) AddAccountToGroup(userID int, groupDisInput dto.GroupDisCreateInput) (int, error) {
 	_, err := gds.groupRepo.FindGroupByID(userID, groupDisInput.GroupID)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return response.ErrCodeGroupNotExist, nil
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.ErrCodeGroupNotExist, err
+		}
+
+		return response.ErrCodeInternal, err
 	}
 
 	_, err = gds.accountRepo.FindAccountByID(userID, groupDisInput.AccountID)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return response.ErrCodeAccountNotExist, nil
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.ErrCodeAccountNotExist, err
+		}
+
+		return response.ErrCodeInternal, err
 	}
 
 	//TODO: Handle race condtion
@@ -65,13 +78,21 @@ func (gds *groupDisService) AddAccountToGroup(userID int, groupDisInput dto.Grou
 
 func (gds *groupDisService) DeleteAccountFromGroup(userID int, groupDisInput dto.GroupDisDeleteInput) (int, error) {
 	_, err := gds.groupRepo.FindGroupByID(userID, groupDisInput.GroupID)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return response.ErrCodeGroupNotExist, nil
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.ErrCodeGroupNotExist, err
+		}
+
+		return response.ErrCodeInternal, err
 	}
 
 	_, err = gds.accountRepo.FindAccountByID(userID, groupDisInput.AccountID)
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return response.ErrCodeAccountNotExist, nil
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.ErrCodeAccountNotExist, err
+		}
+
+		return response.ErrCodeInternal, err
 	}
 
 	percentageRemain, err := gds.groupDisRepo.FindPercentageRemain(userID, groupDisInput.GroupID)
@@ -81,6 +102,9 @@ func (gds *groupDisService) DeleteAccountFromGroup(userID int, groupDisInput dto
 
 	err = gds.groupDisRepo.Delete(userID, percentageRemain, groupDisInput)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return response.ErrCodeDistributionNotExist, err
+		}
 		return response.ErrCodeInternal, err
 	}
 

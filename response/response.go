@@ -43,7 +43,14 @@ func HandleResult(c *gin.Context, result int, data any) {
 
 	case ErrCodePercentageExceed:
 		ErrorResponseExternal(c, result, nil)
+
+	case ErrCodeDistributionNotExist:
+		ErrorResponseExternal(c, result, nil)
+
+	case ErrCodeGroupNotFull:
+		ErrorResponseExternal(c, result, nil)
 	}
+
 }
 
 // success

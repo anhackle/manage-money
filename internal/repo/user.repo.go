@@ -13,7 +13,6 @@ type IUserRepo interface {
 
 type userRepo struct{}
 
-// FindByUserID implements IUserRepo.
 func (ur *userRepo) FindByUserID(userInput po.User) (po.User, error) {
 	var user po.User
 	result := global.Mdb.Where("id = ?", userInput.ID).First(&user)
@@ -24,14 +23,12 @@ func (ur *userRepo) FindByUserID(userInput po.User) (po.User, error) {
 	return user, nil
 }
 
-// Register implements IUserRepo.
 func (ur *userRepo) CreateUser(userInput po.User) error {
 	result := global.Mdb.Create(&userInput)
 
 	return result.Error
 }
 
-// Login implements IUserRepo.
 func (ur *userRepo) FindByEmail(userInput po.User) (po.User, error) {
 	var user po.User
 	result := global.Mdb.Where("email = ?", userInput.Email).First(&user)

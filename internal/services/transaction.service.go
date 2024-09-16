@@ -14,7 +14,7 @@ var (
 )
 
 type ITransactionService interface {
-	ListTransaction(userID int) (int, []dto.TransOutput, error)
+	ListTransaction(userID int, transactionInput *dto.TransListInput) (int, []dto.TransOutput, error)
 	MakeTransaction(userID int, transactionInput dto.TransCreateInput) (int, error)
 }
 
@@ -24,8 +24,8 @@ type transactionService struct {
 	groupDisRepo    repo.IGroupDisRepo
 }
 
-func (ts *transactionService) ListTransaction(userID int) (int, []dto.TransOutput, error) {
-	transactions, err := ts.transactionRepo.FindTransaction(userID)
+func (ts *transactionService) ListTransaction(userID int, transactionInput *dto.TransListInput) (int, []dto.TransOutput, error) {
+	transactions, err := ts.transactionRepo.FindTransaction(userID, transactionInput)
 	if err != nil {
 		return response.ErrCodeInternal, []dto.TransOutput{}, err
 	}
@@ -90,6 +90,16 @@ func (ts *transactionService) validateAccounts(userID int, transactionInput dto.
 			}
 
 			return fromAccount, toAccount, response.ErrCodeInternal, err
+		}
+
+		if toAccount.Type == AccountTypeGroup {
+			percentageRemain, err := ts.groupDisRepo.FindPercentageRemain(userID, *transactionInput.ToAccountID)
+			if err != nil {
+				return fromAccount, toAccount, response.ErrCodeInternal, err
+			}
+			if percentageRemain > 0 {
+				return fromAccount, toAccount, response.ErrCodeGroupNotFull, errors.New("group not full")
+			}
 		}
 	}
 

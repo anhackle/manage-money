@@ -13,11 +13,12 @@ type AccountController struct {
 
 func (ac *AccountController) ListAccount(c *gin.Context) {
 	var (
-		userID   = c.GetInt("userID")
-		accounts []dto.AccountOutput
+		accountInput *dto.AccountListInput
+		userID       = c.GetInt("userID")
+		accounts     []dto.AccountOutput
 	)
 
-	result, accounts, err := ac.accountService.ListAccount(userID)
+	result, accounts, err := ac.accountService.ListAccount(userID, accountInput)
 	if err != nil {
 		response.ErrorResponseInternal(c, response.ErrCodeInternal, nil)
 		return

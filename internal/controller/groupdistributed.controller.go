@@ -13,7 +13,7 @@ type GroupDisController struct {
 
 func (gdc *GroupDisController) ListAccountFromGroup(c *gin.Context) {
 	var (
-		groupDisListInput dto.GroupDisListinput
+		groupDisListInput dto.GroupDisListInput
 		userID            = c.GetInt("userID")
 	)
 	if err := c.ShouldBindJSON(&groupDisListInput); err != nil {

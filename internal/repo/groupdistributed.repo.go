@@ -12,8 +12,8 @@ type IGroupDisRepo interface {
 	Create(userID int, percentageRemain int, groupDisInput dto.GroupDisCreateInput) error
 	Delete(userID int, percentageRemain int, groupDisInput dto.GroupDisDeleteInput) error
 	FindAccountByGroupID(userID, groupID int) ([]po.GroupDistributed, error)
-	FindGroupDisByID(userID int, groupDisInput dto.GroupDisDeleteInput) (dto.GroupDisOutput, error)
-	FindGroupDisByUserID(userID int, groupDisInput dto.GroupDisListinput) ([]dto.GroupDisOutput, error)
+	FindGroupDisByGroupAccount(userID int, groupDisInput dto.GroupDisDeleteInput) (dto.GroupDisOutput, error)
+	FindGroupDisByGroupID(userID int, groupDisInput dto.GroupDisListInput) ([]dto.GroupDisOutput, error)
 	FindPercentageRemain(userID, groupID int) (int, error)
 }
 
@@ -52,7 +52,7 @@ func (gdr *groupDisRepo) FindAccountByGroupID(userID, groupID int) ([]po.GroupDi
 	return accounts, nil
 }
 
-func (gdr *groupDisRepo) FindGroupDisByID(userID int, groupDisInput dto.GroupDisDeleteInput) (dto.GroupDisOutput, error) {
+func (gdr *groupDisRepo) FindGroupDisByGroupAccount(userID int, groupDisInput dto.GroupDisDeleteInput) (dto.GroupDisOutput, error) {
 	var groupDis dto.GroupDisOutput
 	result := global.Mdb.Model(&po.GroupDistributed{}).Where("userID = ? AND groupID = ? AND accountID = ?", userID, groupDisInput.GroupID, groupDisInput.AccountID).First(&groupDis)
 	if result.Error != nil {
@@ -62,7 +62,7 @@ func (gdr *groupDisRepo) FindGroupDisByID(userID int, groupDisInput dto.GroupDis
 	return groupDis, nil
 }
 
-func (gdr *groupDisRepo) FindGroupDisByUserID(userID int, groupDisInput dto.GroupDisListinput) ([]dto.GroupDisOutput, error) {
+func (gdr *groupDisRepo) FindGroupDisByGroupID(userID int, groupDisInput dto.GroupDisListInput) ([]dto.GroupDisOutput, error) {
 	var groupDis []dto.GroupDisOutput
 	result := global.Mdb.Model(&po.GroupDistributed{}).Where("userID = ? AND groupID = ?", userID, groupDisInput.GroupID).Find(&groupDis)
 	if result.Error != nil {
@@ -73,6 +73,11 @@ func (gdr *groupDisRepo) FindGroupDisByUserID(userID int, groupDisInput dto.Grou
 }
 
 func (gdr *groupDisRepo) Delete(userID int, percentageRemain int, groupDisInput dto.GroupDisDeleteInput) error {
+	groupDis, err := gdr.FindGroupDisByGroupAccount(userID, groupDisInput)
+	if err != nil {
+		return err
+	}
+
 	result := global.Mdb.Model(&po.GroupDistributed{}).Where(
 		"userID = ? AND groupID = ? AND accountID = ?",
 		userID,
@@ -82,11 +87,6 @@ func (gdr *groupDisRepo) Delete(userID int, percentageRemain int, groupDisInput 
 	)
 	if result.Error != nil {
 		return result.Error
-	}
-
-	groupDis, err := gdr.FindGroupDisByID(userID, groupDisInput)
-	if err != nil {
-		return err
 	}
 
 	err = global.Rdb.Set(ctx, fmt.Sprintf("Group-%d", groupDisInput.GroupID), percentageRemain+groupDis.Percentage, 0).Err()
