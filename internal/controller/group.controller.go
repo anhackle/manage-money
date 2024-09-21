@@ -18,6 +18,11 @@ func (gc *GroupController) ListGroup(c *gin.Context) {
 		groups     []dto.GroupOutput
 	)
 
+	if err := c.ShouldBindJSON(&groupInput); err != nil {
+		response.ErrorResponseExternal(c, response.ErrCodeExternal, nil)
+		return
+	}
+
 	result, groups, err := gc.groupService.ListGroup(userID, groupInput)
 	if err != nil {
 		response.ErrorResponseInternal(c, response.ErrCodeInternal, nil)

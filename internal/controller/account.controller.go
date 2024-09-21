@@ -18,6 +18,11 @@ func (ac *AccountController) ListAccount(c *gin.Context) {
 		accounts     []dto.AccountOutput
 	)
 
+	if err := c.ShouldBindJSON(&accountInput); err != nil {
+		response.ErrorResponseExternal(c, response.ErrCodeExternal, nil)
+		return
+	}
+
 	result, accounts, err := ac.accountService.ListAccount(userID, accountInput)
 	if err != nil {
 		response.ErrorResponseInternal(c, response.ErrCodeInternal, nil)
