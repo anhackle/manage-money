@@ -21,7 +21,6 @@ type userService struct {
 	tokenRepo repo.ITokenRepo
 }
 
-// Login implements IUserService.
 func (us *userService) Login(userInput po.User) (int, string, error) {
 	user, err := us.userRepo.FindByEmail(userInput)
 	if err != nil {
@@ -50,7 +49,6 @@ func (us *userService) Login(userInput po.User) (int, string, error) {
 	return response.ErrCodeSuccess, accessToken, nil
 }
 
-// Register implements IUserService.
 func (us *userService) Register(userInput po.User) (int, error) {
 	_, err := us.userRepo.FindByEmail(userInput)
 	if err == nil {
