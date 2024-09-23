@@ -106,6 +106,24 @@ func (ts *transactionService) validateAccounts(userID int, transactionInput dto.
 	return fromAccount, toAccount, response.ErrCodeSuccess, nil
 }
 
+func (ts *transactionService) caculateBalance(tx *gorm.DB, userID, currencyID, fromAccountID int) (int, error) {
+	transactions, err := ts.transactionRepo.FindTransactionByUserIDAndCurrency(tx, userID, currencyID, fromAccountID)
+	if err != nil {
+		return -1, err
+	}
+
+	var sum int = 0
+	for _, transaction := range transactions {
+		if transaction.FromAccountID == fromAccountID {
+			sum -= transaction.Amount
+		} else {
+			sum += transaction.Amount
+		}
+	}
+
+	return sum, nil
+}
+
 func (ts *transactionService) createTransaction(tx *gorm.DB, userID int, fromAccount, toAccount *dto.AccountOutput, transactionInput dto.TransCreateInput) (int, error) {
 	if toAccount != nil {
 		err := ts.accountRepo.UpdateAccountBalance(tx, userID, toAccount.ID, toAccount.Balance+transactionInput.Amount)
@@ -115,10 +133,15 @@ func (ts *transactionService) createTransaction(tx *gorm.DB, userID int, fromAcc
 	}
 
 	if fromAccount != nil {
-		if transactionInput.Amount > fromAccount.Balance {
+		fromAccountBalance, err := ts.caculateBalance(tx, userID, transactionInput.CurrencyID, *transactionInput.FromAccountID)
+		if err != nil {
+			return response.ErrCodeInternal, err
+		}
+		if transactionInput.Amount > fromAccountBalance {
 			return response.ErrCodeNotEnoughBalance, errors.New("balance not enough")
 		}
-		err := ts.accountRepo.UpdateAccountBalance(tx, userID, fromAccount.ID, fromAccount.Balance-transactionInput.Amount)
+
+		err = ts.accountRepo.UpdateAccountBalance(tx, userID, fromAccount.ID, fromAccount.Balance-transactionInput.Amount)
 		if err != nil {
 			return response.ErrCodeInternal, err
 		}

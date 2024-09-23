@@ -58,6 +58,7 @@ func MigrateTable() {
 		&po.Account{},
 		&po.Transaction{},
 		&po.GroupDistributed{},
+		&po.Currency{},
 	)
 	if err != nil {
 		fmt.Println("Migrating tables error", err)

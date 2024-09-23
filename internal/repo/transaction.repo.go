@@ -14,6 +14,7 @@ type ITransactionRepo interface {
 	CommitTransaction(tx *gorm.DB) error
 	RollbackTransaction(tx *gorm.DB) error
 	FindTransaction(userID int, transactionInput *dto.TransListInput) ([]dto.TransOutput, error)
+	FindTransactionByUserIDAndCurrency(tx *gorm.DB, userID, currencyID, fromAccountID int) ([]dto.TransOutput, error)
 	CreateTransaction(tx *gorm.DB, userID int, fromAccount, toAccount *dto.AccountOutput, transactionInput dto.TransCreateInput) error
 }
 
@@ -40,6 +41,7 @@ func (tr *transactionRepo) CreateTransaction(tx *gorm.DB, userID int, fromAccoun
 	var transaction = po.Transaction{
 		Date:          time.Now(),
 		Amount:        transactionInput.Amount,
+		CurrencyID:    transactionInput.CurrencyID,
 		Description:   transactionInput.Description,
 		FromAccountID: transactionInput.FromAccountID,
 		ToAccountID:   transactionInput.ToAccountID,
@@ -60,6 +62,19 @@ func (ts *transactionRepo) FindTransaction(userID int, transactionInput *dto.Tra
 		Where("userID = ?", userID).
 		Limit(transactionInput.PageSize).
 		Offset((transactionInput.Page - 1) * transactionInput.PageSize).
+		Find(&transactions)
+	if result.Error != nil {
+		return []dto.TransOutput{}, result.Error
+	}
+
+	return transactions, nil
+}
+
+func (ts *transactionRepo) FindTransactionByUserIDAndCurrency(tx *gorm.DB, userID, currencyID, fromAccountID int) ([]dto.TransOutput, error) {
+	var transactions []dto.TransOutput
+	result := tx.
+		Model(&po.Transaction{}).
+		Where("userID = ? AND currencyID = ? AND (fromAccountID = ? OR toAccountID = ?)", userID, currencyID, fromAccountID, fromAccountID).
 		Find(&transactions)
 	if result.Error != nil {
 		return []dto.TransOutput{}, result.Error

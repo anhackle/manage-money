@@ -11,6 +11,7 @@ type TransListInput struct {
 
 type TransCreateInput struct {
 	Amount        int    `json:"amount" binding:"required,number,gt=0"`
+	CurrencyID    int    `json:"currencyID" binding:"required,number,gt=0"`
 	Description   string `json:"description"`
 	FromAccountID *int   `json:"fromAccountID"`
 	ToAccountID   *int   `json:"toAccountID"`
@@ -19,7 +20,8 @@ type TransCreateInput struct {
 type TransOutput struct {
 	Date          time.Time `gorm:"column:date; not null"`
 	Amount        int       `gorm:"column:amount; not null"`
+	CurrencyID    int       `gorm:"column:currencyID; not null"`
 	Description   string    `gorm:"column:desc; not null"`
-	FromAccountID *int      `gorm:"column:fromaccountID"`
+	FromAccountID int       `gorm:"column:fromaccountID"`
 	ToAccountID   int       `gorm:"column:toaccountID"`
 }
