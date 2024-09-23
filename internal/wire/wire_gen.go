@@ -8,9 +8,59 @@ package wire
 
 import (
 	"github.com/anle/codebase/internal/controller"
+	"github.com/anle/codebase/internal/middlewares"
 	"github.com/anle/codebase/internal/repo"
 	"github.com/anle/codebase/internal/services"
 )
+
+// Injectors from account.wire.go:
+
+func InitAccountRouterHandler() (*controller.AccountController, error) {
+	iAccountRepo := repo.NewAccountRepo()
+	iAccountService := service.NewAccountService(iAccountRepo)
+	accountController := controller.NewAccountController(iAccountService)
+	return accountController, nil
+}
+
+// Injectors from auth.middleware.wire.go:
+
+func InitMiddlewareHandler() (*middlewares.AuthMiddleware, error) {
+	iTokenRepo := repo.NewTokenRepo()
+	iAuthService := service.NewAuthService(iTokenRepo)
+	authMiddleware := middlewares.NewAuthMiddleware(iAuthService)
+	return authMiddleware, nil
+}
+
+// Injectors from group.wire.go:
+
+func InitGroupRouterHandler() (*controller.GroupController, error) {
+	iGroupRepo := repo.NewGroupRepo()
+	iGroupService := service.NewGroupService(iGroupRepo)
+	groupController := controller.NewGroupController(iGroupService)
+	return groupController, nil
+}
+
+// Injectors from groupdistributed.wire.go:
+
+func InitGroupDisRouterHandler() (*controller.GroupDisController, error) {
+	iGroupDisRepo := repo.NewGroupDisRepo()
+	iGroupRepo := repo.NewGroupRepo()
+	iAccountRepo := repo.NewAccountRepo()
+	iGroupDisService := service.NewGroupDisService(iGroupDisRepo, iGroupRepo, iAccountRepo)
+	groupDisController := controller.NewGroupDisController(iGroupDisService)
+	return groupDisController, nil
+}
+
+// Injectors from transaction.wire.go:
+
+func InitTransactionRouterHandler() (*controller.TransactionController, error) {
+	iTransactionRepo := repo.NewTransactionRepo()
+	iAccountRepo := repo.NewAccountRepo()
+	iGroupDisRepo := repo.NewGroupDisRepo()
+	iTransactionService := service.NewTransactionService(iTransactionRepo, iAccountRepo, iGroupDisRepo)
+	transactionController := controller.NewTransactionController(iTransactionService)
+	return transactionController, nil
+}
 
 // Injectors from user.wire.go:
 

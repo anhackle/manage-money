@@ -20,12 +20,37 @@ func HandleResult(c *gin.Context, result int, data any) {
 	case ErrCodeInternal:
 		ErrorResponseInternal(c, result, nil)
 
+	case ErrCodeExternal:
+		ErrorResponseExternal(c, result, nil)
+
 	case ErrCodeUserHasExists:
 		ErrorResponseExternal(c, result, nil)
 
 	case ErrCodeLoginFail:
 		ErrorResponseExternal(c, result, nil)
+
+	case ErrCodeNegativeAmount:
+		ErrorResponseExternal(c, result, nil)
+
+	case ErrCodeNotEnoughBalance:
+		ErrorResponseExternal(c, result, nil)
+
+	case ErrCodeAccountNotExist:
+		ErrorResponseExternal(c, result, nil)
+
+	case ErrCodeGroupNotExist:
+		ErrorResponseExternal(c, result, nil)
+
+	case ErrCodePercentageExceed:
+		ErrorResponseExternal(c, result, nil)
+
+	case ErrCodeDistributionNotExist:
+		ErrorResponseExternal(c, result, nil)
+
+	case ErrCodeGroupNotFull:
+		ErrorResponseExternal(c, result, nil)
 	}
+
 }
 
 // success
@@ -41,7 +66,7 @@ func ErrorResponseExternal(c *gin.Context, code int, data any) {
 	c.JSON(http.StatusBadRequest, ResponseData{
 		Code:    code,
 		Message: msg[code],
-		Data:    nil,
+		Data:    data,
 	})
 }
 
@@ -49,7 +74,7 @@ func ErrorResponseInternal(c *gin.Context, code int, data any) {
 	c.JSON(http.StatusInternalServerError, ResponseData{
 		Code:    code,
 		Message: msg[code],
-		Data:    nil,
+		Data:    data,
 	})
 }
 
